@@ -69,6 +69,7 @@
         "noDangerouslySetInnerHtml": "off" // Covered by Conformance
       },
       "style": {
+        "useImportType": "off", // Turned off due to developer preferences
         "useFragmentSyntax": "warn", // Not in recommended ruleset, turning on manually
         "noYodaExpression": "warn", // Not in recommended ruleset, turning on manually
         "useDefaultParameterLast": "warn", // Not in recommended ruleset, turning on manually

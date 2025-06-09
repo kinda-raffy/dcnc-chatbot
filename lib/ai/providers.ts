@@ -11,7 +11,7 @@ import {
   reasoningModel,
   titleModel,
 } from './models.test';
-import { bedrock, dcncModel } from './aws/bedrock';
+import { bedrock, dcncModels } from './aws/bedrock';
 
 export const myProvider = isTestEnvironment
   ? customProvider({
@@ -24,14 +24,17 @@ export const myProvider = isTestEnvironment
     })
   : customProvider({
       languageModels: {
-        'chat-model': bedrock(dcncModel['sonnet-3.5']),
+        'chat-model': bedrock(dcncModels['sonnet-3.5']),
         // 'chat-model': xai('grok-2-vision-1212'),
         'chat-model-reasoning': wrapLanguageModel({
-          model: bedrock(dcncModel['sonnet-3.5']),
+          model: bedrock(dcncModels['sonnet-3.5']),
+          // model: xai('grok-3-mini-beta'),
           middleware: extractReasoningMiddleware({ tagName: 'think' }),
         }),
-        'title-model': bedrock(dcncModel['haiku-3']),
-        'artifact-model': bedrock(dcncModel['haiku-3']),
+        'title-model': bedrock(dcncModels['sonnet-3.5']),
+        'artifact-model': bedrock(dcncModels['sonnet-3.5']),
+        // 'title-model': xai('grok-2-1212'),
+        // 'artifact-model': xai('grok-2-1212'),
       },
       imageModels: {
         'small-model': xai.image('grok-2-image'),

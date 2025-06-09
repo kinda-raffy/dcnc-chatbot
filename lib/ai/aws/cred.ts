@@ -7,7 +7,7 @@ import { fromCognitoIdentityPool } from '@aws-sdk/credential-providers';
 export const getAwsCognitoCredentials = async () => {
   try {
     const cognitoClient = new CognitoIdentityProviderClient({
-      region: process.env.AWS_REGION as string,
+      region: process.env.AWS_REGION,
     });
     const command = new InitiateAuthCommand({
       AuthFlow: 'USER_PASSWORD_AUTH',

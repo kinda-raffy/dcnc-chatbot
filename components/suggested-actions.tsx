@@ -20,23 +20,24 @@ function PureSuggestedActions({
   const suggestedActions = [
     {
       title: 'What are the advantages',
-      label: 'of using Next.js?',
-      action: 'What are the advantages of using Next.js?',
+      label: 'of using TCP over UDP?',
+      action: 'What are the advantages of using TCP over UDP?',
     },
     {
-      title: 'Write code to',
-      label: `demonstrate djikstra's algorithm`,
-      action: `Write code to demonstrate djikstra's algorithm`,
+      title: 'Write a python script to',
+      label: `show how the CRC algorithm works`,
+      action: `Write a python script to demonstrate how the CRC algorithm works`,
     },
     {
-      title: 'Help me write an essay',
-      label: `about silicon valley`,
-      action: `Help me write an essay about silicon valley`,
+      title: 'Why is the OSI model',
+      label: `seperated into layers?`,
+      action: `Why is the OSI model seperated into layers?`,
     },
     {
       title: 'What is the weather',
-      label: 'in San Francisco?',
-      action: 'What is the weather in San Francisco?',
+      label: 'in Melbourne, Australia?',
+      action:
+        'What is the weather in Melbourne, Australia at 37.8136° S, 144.9631° E?',
     },
   ];
 
