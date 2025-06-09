@@ -19,8 +19,11 @@
     "test": "export PLAYWRIGHT=True && pnpm exec playwright test"
   },
   "dependencies": {
+    "@ai-sdk/amazon-bedrock": "^2.2.10",
     "@ai-sdk/react": "^1.2.11",
     "@ai-sdk/xai": "^1.2.15",
+    "@aws-sdk/client-cognito-identity-provider": "^3.826.0",
+    "@aws-sdk/credential-providers": "^3.826.0",
     "@codemirror/lang-javascript": "^6.2.2",
     "@codemirror/lang-python": "^6.1.6",
     "@codemirror/state": "^6.5.0",
