@@ -27,6 +27,7 @@ import {
   type DBMessage,
   type Chat,
   stream,
+  knowledgeUnit,
 } from './schema';
 import type { ArtifactKind } from '@/components/artifact';
 import { generateUUID } from '../utils';
@@ -534,5 +535,79 @@ export async function getStreamIdsByChatId({ chatId }: { chatId: string }) {
       'bad_request:database',
       'Failed to get stream ids by chat id',
     );
+  }
+}
+
+export async function saveKnowledgeUnit({
+  label,
+  text,
+  userId,
+}: {
+  label: string;
+  text: string;
+  userId: string;
+}) {
+  try {
+    return await db
+      .insert(knowledgeUnit)
+      .values({ label, text, userId, createdAt: new Date() });
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to save knowledge unit',
+    );
+  }
+}
+
+export async function getAllKnowledgeUnits() {
+  try {
+    return await db.select().from(knowledgeUnit);
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to get all knowledge units',
+    );
+  }
+}
+
+export async function getKnowledgeUnitByLabel({ label }: { label: string }) {
+  try {
+    return await db
+      .select()
+      .from(knowledgeUnit)
+      .where(eq(knowledgeUnit.label, label));
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to get knowledge unit by label',
+    );
+  }
+}
+
+export async function getKnowledgeUnitLabels() {
+  try {
+    return await db
+      .select()
+      .from(knowledgeUnit)
+      .orderBy(asc(knowledgeUnit.label));
+  } catch (error) {
+    throw new ChatSDKError(
+      'bad_request:database',
+      'Failed to get knowledge unit label',
+    );
+  }
+}
+
+export async function getUserById({ userId }: { userId: string }) {
+  try {
+    const [wantedUser] = await db
+      .select()
+      .from(user)
+      .where(eq(user.id, userId))
+      .limit(1);
+
+    return wantedUser;
+  } catch (error) {
+    throw new ChatSDKError('bad_request:database', 'Failed to get user');
   }
 }

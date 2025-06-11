@@ -1,8 +1,12 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ['scribe.js-ocr'],
   experimental: {
     ppr: true,
+    serverActions: {
+      bodySizeLimit: '200mb',
+    },
   },
   images: {
     remotePatterns: [
