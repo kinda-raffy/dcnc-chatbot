@@ -174,8 +174,8 @@ export const knowledgeUnit = pgTable('KnowledgeUnit', {
   label: text('label').notNull(),
   text: text('content').notNull(),
   userId: uuid('userId')
-    .notNull()
-    .references(() => user.id),
+    .references(() => user.id)
+    .notNull(),
   createdAt: timestamp('createdAt').notNull(),
 });
 

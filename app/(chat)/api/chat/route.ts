@@ -203,8 +203,13 @@ export async function POST(request: Request) {
                     },
                   ],
                 });
-              } catch (_) {
-                console.error('Failed to save chat');
+              } catch (error) {
+                console.error(
+                  'Failed to save chat in chat/route.ts',
+                  error instanceof Error
+                    ? `${error.message}\n${error.stack}`
+                    : error,
+                );
               }
             }
           },
@@ -235,10 +240,20 @@ export async function POST(request: Request) {
       return new Response(stream);
     }
   } catch (error) {
-    console.error(error);
+    console.error(
+      'Error in chat API:',
+      error instanceof Error ? `${error.message}\n${error.stack}` : error,
+    );
     if (error instanceof ChatSDKError) {
       return error.toResponse();
     }
+
+    return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
+      status: 500,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
   }
 }
 

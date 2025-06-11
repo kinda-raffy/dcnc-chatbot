@@ -101,6 +101,10 @@ export async function saveChat({
       visibility,
     });
   } catch (error) {
+    console.error(
+      'Failed to save chat in queries.ts',
+      error instanceof Error ? `${error.message}\n${error.stack}` : error,
+    );
     throw new ChatSDKError('bad_request:database', 'Failed to save chat');
   }
 }
