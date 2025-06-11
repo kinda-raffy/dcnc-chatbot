@@ -1,17 +1,16 @@
 'use client';
 
 import type { Attachment, UIMessage } from 'ai';
-import cx from 'classnames';
 import type React from 'react';
 import {
   useRef,
-  useEffect,
   useState,
   useCallback,
   type Dispatch,
   type SetStateAction,
   type ChangeEvent,
   memo,
+  useEffect,
 } from 'react';
 import { toast } from 'sonner';
 import { useLocalStorage, useWindowSize } from 'usehooks-ts';
@@ -19,7 +18,6 @@ import { useLocalStorage, useWindowSize } from 'usehooks-ts';
 import { ArrowUpIcon, PaperclipIcon, StopIcon } from './icons';
 import { PreviewAttachment } from './preview-attachment';
 import { Button } from './ui/button';
-import { Textarea } from './ui/textarea';
 import { SuggestedActions } from './suggested-actions';
 import equal from 'fast-deep-equal';
 import type { UseChatHelpers } from '@ai-sdk/react';
@@ -27,6 +25,14 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowDown } from 'lucide-react';
 import { useScrollToBottom } from '@/hooks/use-scroll-to-bottom';
 import type { VisibilityType } from './visibility-selector';
+import TipTapTextEditor from './tip-tap';
+import { cx } from 'class-variance-authority';
+import ExtensionDocument from '@tiptap/extension-document';
+import ExtensionMention from '@tiptap/extension-mention';
+import ExtensionParagraph from '@tiptap/extension-paragraph';
+import ExtensionText from '@tiptap/extension-text';
+import { useEditor } from '@tiptap/react';
+import { suggestion } from './tip-tap-suggestion';
 
 function PureMultimodalInput({
   chatId,
@@ -57,26 +63,26 @@ function PureMultimodalInput({
   className?: string;
   selectedVisibilityType: VisibilityType;
 }) {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const textDivRef = useRef<HTMLDivElement>(null);
   const { width } = useWindowSize();
 
   useEffect(() => {
-    if (textareaRef.current) {
+    if (textDivRef.current) {
       adjustHeight();
     }
   }, []);
 
   const adjustHeight = () => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight + 2}px`;
+    if (textDivRef.current) {
+      textDivRef.current.style.height = 'auto';
+      textDivRef.current.style.height = `${textDivRef.current.scrollHeight + 2}px`;
     }
   };
 
   const resetHeight = () => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = '98px';
+    if (textDivRef.current) {
+      textDivRef.current.style.height = 'auto';
+      textDivRef.current.style.height = '98px';
     }
   };
 
@@ -86,10 +92,8 @@ function PureMultimodalInput({
   );
 
   useEffect(() => {
-    if (textareaRef.current) {
-      const domValue = textareaRef.current.value;
-      // Prefer DOM value over localStorage to handle hydration
-      const finalValue = domValue || localStorageInput || '';
+    if (textDivRef.current) {
+      const finalValue = localStorageInput || '';
       setInput(finalValue);
       adjustHeight();
     }
@@ -101,13 +105,46 @@ function PureMultimodalInput({
     setLocalStorageInput(input);
   }, [input, setLocalStorageInput]);
 
-  const handleInput = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInput(event.target.value);
-    adjustHeight();
-  };
-
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadQueue, setUploadQueue] = useState<Array<string>>([]);
+
+  const editor = useEditor({
+    extensions: [
+      ExtensionDocument,
+      ExtensionParagraph,
+      ExtensionText,
+      ExtensionMention.configure({
+        HTMLAttributes: {
+          class: 'mention',
+        },
+        suggestion,
+      }),
+    ],
+    autofocus: true,
+    content: input,
+    onUpdate: ({ editor }) => {
+      setInput(editor.getText());
+      adjustHeight();
+    },
+    editorProps: {
+      handleKeyDown: (view, event) => {
+        if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
+          // event.preventDefault();
+
+          if (status !== 'ready') {
+            toast.error('Please wait for the model to finish its response!');
+          } else {
+            submitForm();
+          }
+        }
+        if (event.key === 'Enter' && event.shiftKey) {
+          event.preventDefault();
+          // view.dispatch(view.state.tr.insertText('\n'));
+          adjustHeight();
+        }
+      },
+    },
+  });
 
   const submitForm = useCallback(() => {
     window.history.replaceState({}, '', `/chat/${chatId}`);
@@ -120,16 +157,21 @@ function PureMultimodalInput({
     setLocalStorageInput('');
     resetHeight();
 
+    setTimeout(() => {
+      editor?.commands.clearContent();
+    }, 50);
+
     if (width && width > 768) {
-      textareaRef.current?.focus();
+      textDivRef.current?.focus();
     }
   }, [
-    attachments,
+    chatId,
     handleSubmit,
+    attachments,
     setAttachments,
     setLocalStorageInput,
+    editor?.commands,
     width,
-    chatId,
   ]);
 
   const uploadFile = async (file: File) => {
@@ -262,7 +304,19 @@ function PureMultimodalInput({
         </div>
       )}
 
-      <Textarea
+      {/* MARK: Editor */}
+
+      <TipTapTextEditor
+        ref={textDivRef}
+        editor={editor}
+        rows={2}
+        className={cx(
+          'px-5 pt-3 min-h-[24px] max-h-[calc(75dvh)] overflow-hidden resize-none rounded-2xl !text-base bg-muted pb-[64px] dark:border-zinc-700',
+          className,
+        )}
+      />
+
+      {/* <Textarea
         data-testid="multimodal-input"
         ref={textareaRef}
         placeholder="Send a message..."
@@ -289,7 +343,7 @@ function PureMultimodalInput({
             }
           }
         }}
-      />
+      /> */}
 
       <div className="absolute bottom-0 p-2 w-fit flex flex-row justify-start">
         <AttachmentsButton fileInputRef={fileInputRef} status={status} />
