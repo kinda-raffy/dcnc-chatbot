@@ -6,6 +6,9 @@ export const bedrock = createAmazonBedrock({
   credentialProvider: async () => {
     const credFn = await getAwsCognitoCredentials();
     const credentials = await credFn();
+
+    console.log(credentials);
+
     return {
       accessKeyId: credentials.accessKeyId,
       sessionToken: credentials.sessionToken,
