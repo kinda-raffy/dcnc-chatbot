@@ -103,7 +103,9 @@ async function injectContextIntoMessage(
   });
 
   let appendedText =
-    'Below are the context to the lables referenced in the message:';
+    allReferencedLabels.length > 0
+      ? ' ---- Below are the context to the labels referenced in the message:'
+      : '';
   for (const knowledgeUnit of knowledgeUnits) {
     appendedText += `(Start of ${knowledgeUnit.label}) ${knowledgeUnit.text} (End of ${knowledgeUnit.label})`;
   }
