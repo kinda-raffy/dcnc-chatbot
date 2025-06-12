@@ -18,10 +18,10 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { extractPdfText } from '@/lib/actions/pdf';
 import { useSession } from 'next-auth/react';
 import { toast } from './toast';
 import Image from 'next/image';
+import { getPdfContentFromUrl } from '@/lib/actions/pdf-text';
 
 export function KnowledgeBase() {
   const { data: knowledgeUnits } = useSWR<Array<KnowledgeUnit>>(
@@ -101,16 +101,9 @@ function KnowledgeCreateUnit({ disabled }: { disabled: boolean }) {
     setUploadMessage('Processing PDF, please wait...');
 
     try {
-      const formData = new FormData();
-      formData.append('file', file);
+      const result = await getPdfContentFromUrl(file);
 
-      const result = await extractPdfText(formData);
-
-      if ('error' in result) {
-        throw new Error(result.error);
-      }
-
-      setExtractedText(result.text);
+      setExtractedText(result);
       setUploadMessage('');
     } catch (error) {
       console.error('Error:', error);

@@ -1,7 +1,7 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ['scribe.js-ocr'],
+  serverExternalPackages: ['scribe.js-ocr', 'pdf-parse'],
   experimental: {
     ppr: true,
     serverActions: {
