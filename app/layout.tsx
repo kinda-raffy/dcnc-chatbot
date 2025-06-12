@@ -8,8 +8,8 @@ import { SessionProvider } from 'next-auth/react';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://dcnc.kindaraffy.xyz'),
-  title: 'DCNC Chatbot',
-  description: 'DCNC Chatbot',
+  title: 'FenglinGPT',
+  description: 'FenglinGPT',
 };
 
 export const viewport = {

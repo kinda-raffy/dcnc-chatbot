@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 
-const name = 'DCNC Chatbot';
-const proposition = `the ${name}`;
+const name = 'FenglinGPT';
+const proposition = `${name}`;
 
 const greeting: Array<{
   first: string;
