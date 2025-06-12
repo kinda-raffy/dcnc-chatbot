@@ -30,9 +30,21 @@ export function KnowledgeBase() {
   );
 
   return (
-    <div className="flex flex-col gap-4 px-60 pt-10">
-      <span className="text-2xl font-semibold px-2">Global Knowledge Base</span>
-      <KnowledgeUnitList knowledgeUnits={knowledgeUnits ?? []} />
+    <div className="flex flex-col items-center w-full px-4 py-10">
+      <div className="max-w-[1440px] w-full">
+        <div className="flex flex-col gap-2">
+          <span className="text-2xl font-semibold px-2">
+            Global Knowledge Base
+          </span>
+          <span className="text-sm text-muted-foreground px-2">
+            A knowledge base represents the shared context of a course, and can
+            include things like lecture slides, workshop questions or lectorial
+            transcriptions. This context is shared between all users of the
+            course.
+          </span>
+        </div>
+        <KnowledgeUnitList knowledgeUnits={knowledgeUnits ?? []} />
+      </div>
     </div>
   );
 }
@@ -44,7 +56,7 @@ function KnowledgeUnitList({
   const isGuest = !session?.user || session.user.type === 'guest';
 
   return (
-    <div className="flex flex-row flex-wrap gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4 pb-10">
       <KnowledgeCreateUnit disabled={isGuest} />
       {knowledgeUnits.map((unit) => (
         <KnowledgeUnitCard

@@ -51,7 +51,7 @@ export function CommandMenu() {
         <CommandGroup heading="Suggestions">
           <CommandItem
             onSelect={() => {
-              // router.push('/knowledge-base');
+              router.push('/knowledge-base');
               setOpen(false);
             }}
           >

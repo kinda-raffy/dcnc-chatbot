@@ -1,0 +1,1 @@
+ALTER TABLE "KnowledgeUnit" ADD PRIMARY KEY ("id");
