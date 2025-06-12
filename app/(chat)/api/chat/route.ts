@@ -176,8 +176,6 @@ export async function POST(request: Request) {
       injectContextIntoMessage(message),
     ]);
 
-    console.log('injectedMessage:', JSON.stringify(injectedMessage, null, 2));
-
     const messages = appendClientMessage({
       // @ts-expect-error: todo add type conversion from DBMessage[] to UIMessage[]
       messages: previousMessages,

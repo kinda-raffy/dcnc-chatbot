@@ -1,6 +1,6 @@
 'use client';
 
-import useSWR from 'swr';
+import useSWR, { useSWRConfig } from 'swr';
 import { useState } from 'react';
 import { fetcher } from '@/lib/utils';
 import type { KnowledgeUnit } from '@/lib/db/schema';
@@ -59,6 +59,7 @@ function KnowledgeUnitList({
 }
 
 function KnowledgeCreateUnit({ disabled }: { disabled: boolean }) {
+  const { mutate } = useSWRConfig();
   const [extractedText, setExtractedText] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [uploadMessage, setUploadMessage] = useState<string>('');
@@ -152,6 +153,7 @@ function KnowledgeCreateUnit({ disabled }: { disabled: boolean }) {
 
       resetState();
       setIsOpen(false);
+      await mutate('/api/knowledge-base');
     } catch (error) {
       toast({
         type: 'error',
