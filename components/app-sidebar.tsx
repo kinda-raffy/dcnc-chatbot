@@ -18,6 +18,7 @@ import {
 import Link from 'next/link';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { SidebarKnowledgeBase } from './sidebar-knowledge-base';
+import { Search } from 'lucide-react';
 
 export function AppSidebar({ user }: { user: User | undefined }) {
   const router = useRouter();
@@ -60,6 +61,28 @@ export function AppSidebar({ user }: { user: User | undefined }) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
+        <div className="px-2">
+          <Button
+            variant="secondary"
+            type="button"
+            className="flex justify-between gap-2 px-3 h-9 hover:bg-background/10 duration-200 w-full border hover:border-1 transition-all"
+            onClick={() => {
+              const event = new KeyboardEvent('keydown', {
+                key: 'k',
+                metaKey: true,
+              });
+              document.dispatchEvent(event);
+            }}
+          >
+            <div className="flex items-center gap-2">
+              <Search className="size-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Search</span>
+            </div>
+            <kbd className="bg-muted text-muted-foreground pointer-events-none inline-flex h-5 items-center gap-1 rounded border px-1.5 font-mono text-[10px] font-medium opacity-100 select-none">
+              <span className="text-xs">⌘</span>K
+            </kbd>
+          </Button>
+        </div>
         <SidebarKnowledgeBase />
         <SidebarHistory user={user} />
       </SidebarContent>
