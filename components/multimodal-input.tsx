@@ -147,7 +147,7 @@ function PureMultimodalInput({
         renderText({ options, node }) {
           return `<${options.suggestion.char}${node.attrs.label ?? node.attrs.id}>`;
         },
-        suggestion: suggestion,
+        suggestion,
       }),
     ],
     immediatelyRender: false,
@@ -157,7 +157,6 @@ function PureMultimodalInput({
       const text = editor.getText();
       setInput(text);
 
-      console.log('Setting mention list open', mentionRegex.test(text));
       // Check if text ends with @ followed by non-space characters.
       setIsMentionListOpen(mentionRegex.test(text));
 
@@ -171,7 +170,6 @@ function PureMultimodalInput({
           !event.isComposing &&
           !isMentionListOpen
         ) {
-          console.log('In handleKeyDown Mention List Open', isMentionListOpen);
           // event.preventDefault();
 
           if (status !== 'ready') {
@@ -412,11 +410,6 @@ export const MultimodalInput = memo(
     if (prevProps.input !== nextProps.input) return false;
     if (prevProps.status !== nextProps.status) return false;
     if (!equal(prevProps.attachments, nextProps.attachments)) return false;
-    if (
-      prevProps.suggestion?.items?.length !==
-      nextProps.suggestion?.items?.length
-    )
-      return false;
     if (prevProps.selectedVisibilityType !== nextProps.selectedVisibilityType)
       return false;
 
