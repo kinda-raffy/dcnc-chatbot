@@ -11,7 +11,6 @@ import {
   reasoningModel,
   titleModel,
 } from './models.test';
-import { bedrock, dcncModels } from './aws/bedrock';
 
 export const myProvider = isTestEnvironment
   ? customProvider({
@@ -24,8 +23,8 @@ export const myProvider = isTestEnvironment
     })
   : customProvider({
       languageModels: {
-        'chat-model': bedrock(dcncModels['sonnet-3.5']),
-        // 'chat-model': xai('grok-2-vision-1212'),
+        // 'chat-model': bedrock(dcncModels['sonnet-3.5']),
+        'chat-model': xai('grok-2-vision-1212'),
         'chat-model-reasoning': wrapLanguageModel({
           // model: bedrock(dcncModels['sonnet-3.5']),
           model: xai('grok-3-mini-beta'),
