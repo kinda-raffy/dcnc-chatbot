@@ -29,10 +29,22 @@ import TipTapTextEditor from './tip-tap';
 import { cx } from 'class-variance-authority';
 import ExtensionDocument from '@tiptap/extension-document';
 import ExtensionMention from '@tiptap/extension-mention';
+import ExtensionPlaceholder from '@tiptap/extension-placeholder';
 import ExtensionParagraph from '@tiptap/extension-paragraph';
 import ExtensionText from '@tiptap/extension-text';
 import { useEditor } from '@tiptap/react';
-import { suggestion } from './tip-tap-suggestion';
+import { MentionSuggestion } from './tip-tap-suggestion';
+import { cn } from '@/lib/utils';
+
+const mentionRegex = /@[^\s]*$/;
+
+const fetcher = async (url: string): Promise<string[]> => {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error('Failed to fetch labels.');
+  }
+  return response.json();
+};
 
 function PureMultimodalInput({
   chatId,
@@ -48,6 +60,7 @@ function PureMultimodalInput({
   handleSubmit,
   className,
   selectedVisibilityType,
+  suggestion,
 }: {
   chatId: string;
   input: UseChatHelpers['input'];
@@ -62,9 +75,11 @@ function PureMultimodalInput({
   handleSubmit: UseChatHelpers['handleSubmit'];
   className?: string;
   selectedVisibilityType: VisibilityType;
+  suggestion?: MentionSuggestion;
 }) {
   const textDivRef = useRef<HTMLDivElement>(null);
   const { width } = useWindowSize();
+  const [isMentionListOpen, setIsMentionListOpen] = useState(false);
 
   useEffect(() => {
     if (textDivRef.current) {
@@ -113,22 +128,50 @@ function PureMultimodalInput({
       ExtensionDocument,
       ExtensionParagraph,
       ExtensionText,
+      ExtensionPlaceholder.configure({
+        placeholder: 'Type a message...',
+      }),
       ExtensionMention.configure({
         HTMLAttributes: {
-          class: 'mention',
+          class: cx(
+            'mention',
+            'bg-blue-100 dark:bg-blue-900/30',
+            'text-blue-700 dark:text-blue-300',
+            'px-1.5 py-0.5 rounded-md',
+            'font-medium',
+            'hover:bg-blue-200 dark:hover:bg-blue-800/40',
+            'transition-colors duration-200',
+            'animate-in fade-in duration-1000 ease-out',
+          ),
         },
-        suggestion,
+        renderText({ options, node }) {
+          return `<${options.suggestion.char}${node.attrs.label ?? node.attrs.id}>`;
+        },
+        suggestion: suggestion,
       }),
     ],
+    immediatelyRender: false,
     autofocus: true,
     content: input,
     onUpdate: ({ editor }) => {
-      setInput(editor.getText());
+      const text = editor.getText();
+      setInput(text);
+
+      console.log('Setting mention list open', mentionRegex.test(text));
+      // Check if text ends with @ followed by non-space characters.
+      setIsMentionListOpen(mentionRegex.test(text));
+
       adjustHeight();
     },
     editorProps: {
       handleKeyDown: (view, event) => {
-        if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
+        if (
+          event.key === 'Enter' &&
+          !event.shiftKey &&
+          !event.isComposing &&
+          !isMentionListOpen
+        ) {
+          console.log('In handleKeyDown Mention List Open', isMentionListOpen);
           // event.preventDefault();
 
           if (status !== 'ready') {
@@ -306,15 +349,14 @@ function PureMultimodalInput({
 
       {/* MARK: Editor */}
 
-      <TipTapTextEditor
-        ref={textDivRef}
-        editor={editor}
-        rows={2}
-        className={cx(
-          'px-5 pt-3 min-h-[24px] max-h-[calc(75dvh)] overflow-hidden resize-none rounded-2xl !text-base bg-muted pb-[64px] dark:border-zinc-700',
+      <div
+        className={cn(
+          `px-5 pt-3 min-h-[64px] max-h-[calc(75dvh)] overflow-hidden resize-none rounded-2xl !text-base bg-muted pb-[64px] dark:border-zinc-700`,
           className,
         )}
-      />
+      >
+        <TipTapTextEditor ref={textDivRef} editor={editor} rows={2} />
+      </div>
 
       {/* <Textarea
         data-testid="multimodal-input"
@@ -370,6 +412,11 @@ export const MultimodalInput = memo(
     if (prevProps.input !== nextProps.input) return false;
     if (prevProps.status !== nextProps.status) return false;
     if (!equal(prevProps.attachments, nextProps.attachments)) return false;
+    if (
+      prevProps.suggestion?.items?.length !==
+      nextProps.suggestion?.items?.length
+    )
+      return false;
     if (prevProps.selectedVisibilityType !== nextProps.selectedVisibilityType)
       return false;
 

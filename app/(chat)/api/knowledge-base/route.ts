@@ -1,9 +1,9 @@
 import { auth } from '@/app/(auth)/auth';
-import { getKnowledgeUnitLabels, saveKnowledgeUnit } from '@/lib/db/queries';
+import { getAllKnowledgeUnits, saveKnowledgeUnit } from '@/lib/db/queries';
 import { ChatSDKError } from '@/lib/errors';
 
 export async function GET(_: Request) {
-  const knowledgeUnitLabels = await getKnowledgeUnitLabels();
+  const knowledgeUnitLabels = await getAllKnowledgeUnits();
 
   return Response.json(knowledgeUnitLabels, { status: 200 });
 }

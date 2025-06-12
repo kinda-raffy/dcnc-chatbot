@@ -25,6 +25,10 @@ This is a guide for using artifacts tools: \`createDocument\` and \`updateDocume
 - Default to full document rewrites for major changes
 - Use targeted updates only for specific, isolated changes
 - Follow user instructions for which parts to modify
+- Do not update document immediately after creating it.
+- Do not update the document excessively.
+
+NEVER EVER UPDATE THE DOCUMENT IMMEDIATELY AFTER CREATING IT.
 
 **When NOT to use \`updateDocument\`:**
 - Immediately after creating a document
@@ -43,7 +47,7 @@ export interface RequestHints {
 }
 
 export const getRequestPromptFromHints = (requestHints: RequestHints) => `\
-About the origin of user's request:
+About the location of the user's request:
 - lat: ${requestHints.latitude}
 - lon: ${requestHints.longitude}
 - city: ${requestHints.city}

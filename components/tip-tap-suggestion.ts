@@ -3,7 +3,7 @@ import tippy from 'tippy.js';
 import TipTapMentionList from './tip-tap-mention-list';
 import { MentionOptions } from '@tiptap/extension-mention';
 
-type MentionSuggestion = MentionOptions['suggestion'];
+export type MentionSuggestion = MentionOptions['suggestion'];
 
 const fuzzySearch = (str: string, pattern: string): boolean => {
   const lowerPattern = pattern.toLowerCase();
@@ -23,37 +23,11 @@ const fuzzySearch = (str: string, pattern: string): boolean => {
   return patternIdx === lowerPattern.length;
 };
 
-export const suggestion: MentionSuggestion = {
+export const getUnitLabelSuggestion: (labels: string[]) => MentionSuggestion = (
+  labels,
+) => ({
   items: ({ query }) => {
-    return [
-      'Lea Thompson',
-      'Cyndi Lauper',
-      'Tom Cruise',
-      'Madonna',
-      'Jerry Hall',
-      'Joan Collins',
-      'Winona Ryder',
-      'Christina Applegate',
-      'Alyssa Milano',
-      'Molly Ringwald',
-      'Ally Sheedy',
-      'Debbie Harry',
-      'Olivia Newton-John',
-      'Elton John',
-      'Michael J. Fox',
-      'Axl Rose',
-      'Emilio Estevez',
-      'Ralph Macchio',
-      'Rob Lowe',
-      'Jennifer Grey',
-      'Mickey Rourke',
-      'John Cusack',
-      'Matthew Broderick',
-      'Justine Bateman',
-      'Lisa Bonet',
-    ]
-      .filter((item) => fuzzySearch(item, query))
-      .slice(0, 5);
+    return labels.filter((item) => fuzzySearch(item, query)).slice(0, 5);
   },
 
   render: () => {
@@ -111,4 +85,4 @@ export const suggestion: MentionSuggestion = {
       },
     };
   },
-};
+});

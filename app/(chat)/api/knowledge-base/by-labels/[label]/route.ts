@@ -1,4 +1,4 @@
-import { getKnowledgeUnitByLabel } from '@/lib/db/queries';
+import { getKnowledgeUnitsByLabels } from '@/lib/db/queries';
 import { ChatSDKError } from '@/lib/errors';
 
 export async function GET(request: Request) {
@@ -12,7 +12,9 @@ export async function GET(request: Request) {
     ).toResponse();
   }
 
-  const knowledgeUnit = await getKnowledgeUnitByLabel({ label });
+  const labels = label.split(',');
+
+  const knowledgeUnit = await getKnowledgeUnitsByLabels({ labels });
 
   return Response.json(knowledgeUnit, { status: 200 });
 }

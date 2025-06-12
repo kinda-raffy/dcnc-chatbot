@@ -565,7 +565,10 @@ export async function saveKnowledgeUnit({
 
 export async function getAllKnowledgeUnits() {
   try {
-    return await db.select().from(knowledgeUnit);
+    return await db
+      .select()
+      .from(knowledgeUnit)
+      .orderBy(desc(knowledgeUnit.createdAt));
   } catch (error) {
     throw new ChatSDKError(
       'bad_request:database',
@@ -574,12 +577,14 @@ export async function getAllKnowledgeUnits() {
   }
 }
 
-export async function getKnowledgeUnitByLabel({ label }: { label: string }) {
+export async function getKnowledgeUnitsByLabels({
+  labels,
+}: { labels: string[] }) {
   try {
     return await db
       .select()
       .from(knowledgeUnit)
-      .where(eq(knowledgeUnit.label, label));
+      .where(inArray(knowledgeUnit.label, labels));
   } catch (error) {
     throw new ChatSDKError(
       'bad_request:database',
@@ -588,12 +593,14 @@ export async function getKnowledgeUnitByLabel({ label }: { label: string }) {
   }
 }
 
-export async function getKnowledgeUnitLabels() {
+export async function getKnowledgeUnitLabels(): Promise<string[]> {
   try {
-    return await db
-      .select()
+    const res = await db
+      .select({ label: knowledgeUnit.label })
       .from(knowledgeUnit)
-      .orderBy(asc(knowledgeUnit.label));
+      .orderBy(desc(knowledgeUnit.createdAt));
+
+    return res.map(({ label }) => label);
   } catch (error) {
     throw new ChatSDKError(
       'bad_request:database',

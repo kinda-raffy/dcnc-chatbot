@@ -4,6 +4,7 @@ import {
   createDataStream,
   smoothStream,
   streamText,
+  UIMessage,
 } from 'ai';
 import { auth, type UserType } from '@/app/(auth)/auth';
 import { type RequestHints, systemPrompt } from '@/lib/ai/prompts';
@@ -11,6 +12,7 @@ import {
   createStreamId,
   deleteChatById,
   getChatById,
+  getKnowledgeUnitsByLabels,
   getMessageCountByUserId,
   getMessagesByChatId,
   getStreamIdsByChatId,
@@ -61,6 +63,59 @@ function getStreamContext() {
   return globalStreamContext;
 }
 
+function parseMessage(message: UIMessage): UIMessage {
+  const parts: UIMessage['parts'] = message.parts.map((part) => {
+    if (part.type === 'text') {
+      const convertedText = part.text.replace(/<@([^>]+)>/g, '@$1');
+      return {
+        type: 'text',
+        text: convertedText,
+      };
+    }
+
+    return part;
+  });
+
+  const parsedContent = message.content
+    ? message.content.replace(/<@([^>]+)>/g, '@$1')
+    : message.content;
+
+  return { ...message, parts, content: parsedContent };
+}
+
+async function injectContextIntoMessage(
+  message: UIMessage,
+): Promise<UIMessage> {
+  const allReferencedLabels = message.parts
+    .flatMap((part) => {
+      if (part.type === 'text') {
+        const isMatch = part.text.match(/<@([^>]+)>/g);
+
+        if (isMatch) {
+          return isMatch.map((match) => match.replace(/<@([^>]+)>/g, '$1'));
+        }
+      }
+    })
+    .filter((u) => u !== undefined);
+
+  const knowledgeUnits = await getKnowledgeUnitsByLabels({
+    labels: allReferencedLabels,
+  });
+
+  let appendedText =
+    'Below are the context to the lables referenced in the message:';
+  for (const knowledgeUnit of knowledgeUnits) {
+    appendedText += `(Start of ${knowledgeUnit.label}) ${knowledgeUnit.text} (End of ${knowledgeUnit.label})`;
+  }
+
+  const parts: UIMessage['parts'] = [
+    ...message.parts,
+    { type: 'text', text: appendedText },
+  ];
+
+  return { ...message, parts, content: message.content + appendedText };
+}
+
 export async function POST(request: Request) {
   let requestBody: PostRequestBody;
 
@@ -75,6 +130,8 @@ export async function POST(request: Request) {
   try {
     const { id, message, selectedChatModel, selectedVisibilityType } =
       requestBody;
+
+    const displayMessage = parseMessage(message);
 
     const session = await auth();
 
@@ -97,7 +154,7 @@ export async function POST(request: Request) {
 
     if (!chat) {
       const title = await generateTitleFromUserMessage({
-        message,
+        message: displayMessage,
       });
 
       await saveChat({
@@ -112,12 +169,17 @@ export async function POST(request: Request) {
       }
     }
 
-    const previousMessages = await getMessagesByChatId({ id });
+    const [previousMessages, injectedMessage] = await Promise.all([
+      getMessagesByChatId({ id }),
+      injectContextIntoMessage(message),
+    ]);
+
+    console.log('injectedMessage:', JSON.stringify(injectedMessage, null, 2));
 
     const messages = appendClientMessage({
       // @ts-expect-error: todo add type conversion from DBMessage[] to UIMessage[]
       messages: previousMessages,
-      message,
+      message: injectedMessage,
     });
 
     const { longitude, latitude, city, country } = geolocation(request);
@@ -133,10 +195,10 @@ export async function POST(request: Request) {
       messages: [
         {
           chatId: id,
-          id: message.id,
+          id: displayMessage.id,
           role: 'user',
-          parts: message.parts,
-          attachments: message.experimental_attachments ?? [],
+          parts: displayMessage.parts,
+          attachments: displayMessage.experimental_attachments ?? [],
           createdAt: new Date(),
         },
       ],

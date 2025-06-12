@@ -2,7 +2,7 @@
 
 import type { Attachment, UIMessage } from 'ai';
 import { useChat } from '@ai-sdk/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import { ChatHeader } from '@/components/chat-header';
 import type { Vote } from '@/lib/db/schema';
@@ -20,6 +20,7 @@ import { useSearchParams } from 'next/navigation';
 import { useChatVisibility } from '@/hooks/use-chat-visibility';
 import { useAutoResume } from '@/hooks/use-auto-resume';
 import { ChatSDKError } from '@/lib/errors';
+import { getUnitLabelSuggestion } from './tip-tap-suggestion';
 
 export function Chat({
   id,
@@ -116,6 +117,16 @@ export function Chat({
     setMessages,
   });
 
+  const { data: labels } = useSWR<string[]>(
+    '/api/knowledge-base/all-labels',
+    fetcher,
+  );
+
+  const memoisedSuggestion = useMemo(
+    () => getUnitLabelSuggestion(labels ?? []),
+    [labels],
+  );
+
   return (
     <>
       <div className="flex flex-col min-w-0 h-dvh bg-background">
@@ -153,6 +164,7 @@ export function Chat({
               setMessages={setMessages}
               append={append}
               selectedVisibilityType={visibilityType}
+              suggestion={memoisedSuggestion}
             />
           )}
         </form>
