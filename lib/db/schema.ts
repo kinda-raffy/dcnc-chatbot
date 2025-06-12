@@ -170,7 +170,7 @@ export const stream = pgTable(
 export type Stream = InferSelectModel<typeof stream>;
 
 export const knowledgeUnit = pgTable('KnowledgeUnit', {
-  id: uuid('id').notNull().defaultRandom(),
+  id: uuid('id').notNull().defaultRandom().primaryKey(),
   label: text('label').notNull(),
   text: text('content').notNull(),
   userId: uuid('userId')
